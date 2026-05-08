@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindMove</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #6366f1;
+      --accent-soft: #eef2ff;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #fff;
+      color: #111827;
+      min-height: 100vh;
+    }
+
+    /* ---- Real-time clock bar ---- */
+    #clock-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #fff;
+      border-bottom: 1px solid #f3f4f6;
+      text-align: center;
+      padding: 0.45rem 1rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.03em;
+    }
+
+    #app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 0 1.5rem;
+    }
+
+    /* ---- Screens ---- */
+    .screen {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      padding: 2.5rem 0;
+    }
+
+    .screen.active {
+      display: flex;
+      animation: fadeUp 0.25s ease-out both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ---- Buttons ---- */
+    .btn {
+      border: none;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 1rem 1.5rem;
+      width: 100%;
+      transition: opacity 0.15s, transform 0.1s;
+      letter-spacing: 0.01em;
+    }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      font-size: 1.15rem;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+
+    .btn-ghost {
+      background: #f3f4f6;
+      color: #374151;
+    }
+    .btn-ghost:hover { background: #e5e7eb; }
+
+    /* ===== SCREEN 1: HOME ===== */
+    #s-home {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 0.75rem;
+    }
+
+    #s-home h1 {
+      font-size: 3.2rem;
+      font-weight: 900;
+      letter-spacing: -2px;
+      color: var(--accent);
+    }
+
+    #s-home p {
+      font-size: 1.05rem;
+      color: #6b7280;
+    }
+
+    .home-members {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      letter-spacing: 0.02em;
+      margin-top: 0.25rem;
+    }
+
+    #s-home .btn-primary {
+      margin-top: 1.75rem;
+    }
+
+    /* ===== SCREEN 2: MOOD ===== */
+    #s-mood { gap: 1.5rem; }
+
+    #s-mood h2 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.35;
+    }
+
+    .mood-grid {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.7rem;
+    }
+
+    .mood-btn {
+      border: none;
+      border-radius: 16px;
+      padding: 1rem 1.25rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: #1a1a1a;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .mood-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+    }
+    .mood-btn:active { transform: scale(0.98); }
+    .mood-btn .em { font-size: 1.75rem; }
+
+    /* ===== SCREEN 3: ACTIVITY ===== */
+    #s-activity { gap: 1.5rem; }
+
+    .mood-tag {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 1.15rem;
+      font-weight: 600;
+    }
+    .mood-tag .em { font-size: 2rem; }
+
+    .activity-card {
+      background: var(--accent-soft);
+      border-radius: 20px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      flex: 1;
+    }
+    .activity-card h3 {
+      font-size: 1.4rem;
+      font-weight: 800;
+    }
+    .activity-card p {
+      font-size: 1rem;
+      color: #374151;
+      line-height: 1.5;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 8px;
+      padding: 0.3rem 0.8rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      width: fit-content;
+    }
+
+    /* ===== SCREEN 4: TIMER ===== */
+    #s-timer {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 1.75rem;
+    }
+
+    .timer-label {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #6b7280;
+    }
+
+    .timer-clock {
+      font-size: 5rem;
+      font-weight: 900;
+      letter-spacing: -3px;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+
+    .timer-congrats {
+      font-size: 1.6rem;
+      font-weight: 700;
+      display: none;
+    }
+
+    .timer-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      width: 100%;
+    }
+
+    /* ===== SCREEN 5: HISTORY ===== */
+    #s-history { gap: 1.5rem; }
+
+    #s-history h2 {
+      font-size: 1.45rem;
+      font-weight: 700;
+    }
+
+    .history-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .history-empty {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #9ca3af;
+      font-size: 1rem;
+      padding: 2rem 0;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 0.9rem 1rem;
+    }
+    .history-item .em { font-size: 1.8rem; flex-shrink: 0; }
+
+    .hi-body { flex: 1; min-width: 0; }
+    .hi-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .hi-meta { font-size: 0.8rem; color: #6b7280; margin-top: 0.15rem; }
+
+    .hi-dur {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+<div id="clock-bar" aria-live="polite"></div>
+<div id="app">
+
+  <!-- SCREEN 1: HOME -->
+  <div id="s-home" class="screen active">
+    <h1>MindMove</h1>
+    <p>Movimento para cada momento</p>
+    <div class="home-members">Arthur Gabriel &amp; João Pedro Kern</div>
+    <button class="btn btn-primary" onclick="nav('s-mood')">Como você está agora?</button>
+  </div>
+
+  <!-- SCREEN 2: MOOD CHECK -->
+  <div id="s-mood" class="screen">
+    <h2>Como você está se sentindo hoje?</h2>
+    <div class="mood-grid">
+      <button class="mood-btn" style="background:#a78bfa" onclick="pickMood('ansioso')">
+        <span class="em">😰</span> Ansioso
+      </button>
+      <button class="mood-btn" style="background:#93c5fd" onclick="pickMood('cansado')">
+        <span class="em">😴</span> Cansado
+      </button>
+      <button class="mood-btn" style="background:#f87171" onclick="pickMood('estressado')">
+        <span class="em">😤</span> Estressado
+      </button>
+      <button class="mood-btn" style="background:#86efac" onclick="pickMood('bem')">
+        <span class="em">🙂</span> Bem
+      </button>
+      <button class="mood-btn" style="background:#fde68a" onclick="pickMood('animado')">
+        <span class="em">🤩</span> Animado
+      </button>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: ACTIVITY SUGGESTION -->
+  <div id="s-activity" class="screen">
+    <div class="mood-tag">
+      <span class="em" id="a-emoji"></span>
+      <span id="a-label"></span>
+    </div>
+    <div class="activity-card">
+      <h3 id="a-name"></h3>
+      <p id="a-desc"></p>
+      <div class="badge" id="a-dur"></div>
+    </div>
+    <button class="btn btn-primary" onclick="beginTimer()">Iniciar timer</button>
+  </div>
+
+  <!-- SCREEN 4: TIMER -->
+  <div id="s-timer" class="screen">
+    <div class="timer-label" id="t-label"></div>
+    <div class="timer-clock" id="t-clock">00:00</div>
+    <div class="timer-congrats" id="t-congrats">Você completou! 🎉</div>
+    <div class="timer-actions">
+      <button class="btn btn-primary" id="t-toggle" onclick="toggleTimer()">Iniciar</button>
+      <button class="btn btn-ghost" onclick="resetTimer()">Reiniciar</button>
+      <button class="btn btn-primary" id="t-hist" style="display:none" onclick="goHistory()">Ver meu histórico</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 5: HISTORY -->
+  <div id="s-history" class="screen">
+    <h2>Seu histórico</h2>
+    <div class="history-list" id="hist-list"></div>
+    <button class="btn btn-primary" onclick="goHome()">Nova atividade</button>
+  </div>
+
+</div>
+<script>
+  function tickClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    document.getElementById('clock-bar').textContent = h + ':' + m + ':' + s;
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+
+  const DATA = {
+    ansioso:    { name: 'Respiração + Alongamento', desc: 'Respire fundo e solte a tensão do corpo.',        mins: 8,  emoji: '😰', label: 'Ansioso',    color: '#a78bfa', soft: '#f5f3ff' },
+    cansado:    { name: 'Caminhada Leve',           desc: 'Um passeio curto para despertar a energia.',      mins: 10, emoji: '😴', label: 'Cansado',    color: '#93c5fd', soft: '#eff6ff' },
+    estressado: { name: 'Dança Livre',              desc: 'Coloque uma música e dance sem pensar.',          mins: 5,  emoji: '😤', label: 'Estressado', color: '#f87171', soft: '#fef2f2' },
+    bem:        { name: 'Treino Rápido',            desc: 'Aproveite o bom humor para se movimentar mais.', mins: 15, emoji: '🙂', label: 'Bem',        color: '#86efac', soft: '#f0fdf4' },
+    animado:    { name: 'Corrida ou Pulo',          desc: 'Gaste essa energia toda de uma vez!',            mins: 12, emoji: '🤩', label: 'Animado',    color: '#fde68a', soft: '#fefce8' },
+  };
+
+  let mood = null;
+  let timerTotal = 0, timerLeft = 0, timerOn = false, timerDone = false, timerTick = null;
+
+  function setAccent(color, soft) {
+    document.documentElement.style.setProperty('--accent', color);
+    document.documentElement.style.setProperty('--accent-soft', soft);
+  }
+
+  function nav(id) {
+    document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function pickMood(key) {
+    mood = key;
+    const d = DATA[key];
+    setAccent(d.color, d.soft);
+    document.getElementById('a-emoji').textContent = d.emoji;
+    document.getElementById('a-label').textContent  = d.label;
+    document.getElementById('a-name').textContent   = d.name;
+    document.getElementById('a-desc').textContent   = d.desc;
+    document.getElementById('a-dur').textContent    = d.mins + ' min';
+    nav('s-activity');
+  }
+
+  function beginTimer() {
+    const d = DATA[mood];
+    timerTotal = d.mins * 60;
+    timerLeft  = timerTotal;
+    timerOn    = false;
+    timerDone  = false;
+    clearInterval(timerTick);
+    document.getElementById('t-label').textContent      = d.name;
+    document.getElementById('t-clock').textContent      = fmt(timerLeft);
+    document.getElementById('t-congrats').style.display = 'none';
+    document.getElementById('t-toggle').style.display   = '';
+    document.getElementById('t-toggle').textContent     = 'Iniciar';
+    document.getElementById('t-hist').style.display     = 'none';
+    nav('s-timer');
+  }
+
+  function fmt(s) {
+    return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+  }
+
+  function toggleTimer() {
+    if (timerDone) return;
+    if (timerOn) {
+      clearInterval(timerTick);
+      timerOn = false;
+      document.getElementById('t-toggle').textContent = 'Continuar';
+    } else {
+      timerOn = true;
+      document.getElementById('t-toggle').textContent = 'Pausar';
+      timerTick = setInterval(() => {
+        timerLeft--;
+        document.getElementById('t-clock').textContent = fmt(timerLeft);
+        if (timerLeft <= 0) {
+          clearInterval(timerTick);
+          timerOn   = false;
+          timerDone = true;
+          onComplete();
+        }
+      }, 1000);
+    }
+  }
+
+  function resetTimer() {
+    clearInterval(timerTick);
+    timerOn   = false;
+    timerDone = false;
+    timerLeft = timerTotal;
+    document.getElementById('t-clock').textContent      = fmt(timerLeft);
+    document.getElementById('t-congrats').style.display = 'none';
+    document.getElementById('t-toggle').style.display   = '';
+    document.getElementById('t-toggle').textContent     = 'Iniciar';
+    document.getElementById('t-hist').style.display     = 'none';
+  }
+
+  function onComplete() {
+    document.getElementById('t-congrats').style.display = 'block';
+    document.getElementById('t-toggle').style.display   = 'none';
+    document.getElementById('t-hist').style.display     = '';
+    saveEntry();
+  }
+
+  function saveEntry() {
+    const d   = DATA[mood];
+    const now = new Date();
+    const entry = {
+      date:      now.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                 + ' ' + now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      emoji:     d.emoji,
+      moodLabel: d.label,
+      activity:  d.name,
+      mins:      d.mins,
+    };
+    const hist = loadHistory();
+    hist.unshift(entry);
+    localStorage.setItem('mindmove', JSON.stringify(hist));
+  }
+
+  function loadHistory() {
+    try { return JSON.parse(localStorage.getItem('mindmove') || '[]'); } catch { return []; }
+  }
+
+  function goHistory() {
+    const hist = loadHistory();
+    const el   = document.getElementById('hist-list');
+    if (hist.length === 0) {
+      el.innerHTML = '<div class="history-empty">Nenhuma atividade ainda. Comece agora!</div>';
+    } else {
+      el.innerHTML = hist.map(e => `
+        <div class="history-item">
+          <span class="em">${e.emoji}</span>
+          <div class="hi-body">
+            <div class="hi-name">${e.activity}</div>
+            <div class="hi-meta">${e.moodLabel} · ${e.date}</div>
+          </div>
+          <span class="hi-dur">${e.mins} min</span>
+        </div>
+      `).join('');
+    }
+    nav('s-history');
+  }
+
+  function goHome() {
+    setAccent('#6366f1', '#eef2ff');
+    nav('s-home');
+  }
+</script>
+</body>
+</html>
