@@ -7,56 +7,36 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root {
-      --accent: #6366f1;
-      --accent-soft: #eef2ff;
-    }
+    :root { --accent: #6366f1; --accent-soft: #eef2ff; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #fff;
-      color: #111827;
-      min-height: 100vh;
+      background: #fff; color: #111827; min-height: 100vh;
     }
 
-    /* ---- Real-time clock bar ---- */
+    /* ---- Clock ---- */
     #clock-bar {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: #fff;
-      border-bottom: 1px solid #f3f4f6;
-      text-align: center;
-      padding: 0.45rem 1rem;
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--accent);
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 0.03em;
+      position: sticky; top: 0; z-index: 100;
+      background: #fff; border-bottom: 1px solid #f3f4f6;
+      text-align: center; padding: 0.45rem 1rem;
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--accent); font-variant-numeric: tabular-nums; letter-spacing: 0.03em;
     }
 
+    /* ---- Confetti ---- */
+    #confetti-box { position: fixed; inset: 0; pointer-events: none; z-index: 9999; overflow: hidden; }
+    .cp { position: absolute; top: -14px; animation: cfFall linear forwards; }
+    @keyframes cfFall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+
+    /* ---- Layout ---- */
     #app {
-      max-width: 480px;
-      margin: 0 auto;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      padding: 0 1.5rem;
+      max-width: 480px; margin: 0 auto; min-height: 100vh;
+      display: flex; flex-direction: column; padding: 0 1.5rem;
     }
 
     /* ---- Screens ---- */
-    .screen {
-      display: none;
-      flex-direction: column;
-      flex: 1;
-      padding: 2.5rem 0;
-    }
-
-    .screen.active {
-      display: flex;
-      animation: fadeUp 0.25s ease-out both;
-    }
-
+    .screen { display: none; flex-direction: column; flex: 1; padding: 2rem 0; }
+    .screen.active { display: flex; animation: fadeUp 0.25s ease-out both; }
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(10px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -64,269 +44,149 @@
 
     /* ---- Buttons ---- */
     .btn {
-      border: none;
-      border-radius: 14px;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      padding: 1rem 1.5rem;
-      width: 100%;
+      border: none; border-radius: 14px; font-size: 1rem; font-weight: 700;
+      cursor: pointer; padding: 1rem 1.5rem; width: 100%;
       transition: opacity 0.15s, transform 0.1s;
-      letter-spacing: 0.01em;
     }
     .btn:active { transform: scale(0.97); }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #fff;
-      font-size: 1.15rem;
-    }
+    .btn-primary { background: var(--accent); color: #fff; font-size: 1.15rem; }
     .btn-primary:hover { opacity: 0.85; }
-
-    .btn-ghost {
-      background: #f3f4f6;
-      color: #374151;
-    }
+    .btn-ghost { background: #f3f4f6; color: #374151; }
     .btn-ghost:hover { background: #e5e7eb; }
-
-    /* ===== SCREEN 1: HOME ===== */
-    #s-home {
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      gap: 0.75rem;
+    .back-btn {
+      background: none; border: none; font-size: 1.5rem; cursor: pointer;
+      color: #9ca3af; padding: 0.2rem 0.5rem; border-radius: 8px;
+      line-height: 1; transition: color 0.15s, background 0.15s; align-self: flex-start;
     }
+    .back-btn:hover { color: #374151; background: #f3f4f6; }
 
-    #s-home h1 {
-      font-size: 3.2rem;
-      font-weight: 900;
-      letter-spacing: -2px;
-      color: var(--accent);
+    /* ---- HOME ---- */
+    #s-home { justify-content: center; align-items: center; text-align: center; gap: 0.75rem; }
+    #s-home h1 { font-size: 3.2rem; font-weight: 900; letter-spacing: -2px; color: var(--accent); }
+    #s-home > p { font-size: 1.05rem; color: #6b7280; }
+    .home-members { font-size: 0.8rem; color: #9ca3af; letter-spacing: 0.02em; }
+    .streak-badge {
+      background: #fff7ed; color: #ea580c; border: 1.5px solid #fed7aa;
+      border-radius: 20px; padding: 0.35rem 1rem; font-size: 0.95rem; font-weight: 700;
     }
+    #s-home .btn-primary { margin-top: 1rem; }
 
-    #s-home p {
-      font-size: 1.05rem;
-      color: #6b7280;
-    }
-
-    .home-members {
-      font-size: 0.8rem;
-      color: #9ca3af;
-      letter-spacing: 0.02em;
-      margin-top: 0.25rem;
-    }
-
-    #s-home .btn-primary {
-      margin-top: 1.75rem;
-    }
-
-    /* ===== SCREEN 2: MOOD ===== */
-    #s-mood { gap: 1.5rem; }
-
-    #s-mood h2 {
-      font-size: 1.45rem;
-      font-weight: 700;
-      text-align: center;
-      line-height: 1.35;
-    }
-
-    .mood-grid {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 0.7rem;
-    }
-
+    /* ---- MOOD ---- */
+    #s-mood { gap: 1rem; }
+    #s-mood h2 { font-size: 1.45rem; font-weight: 700; text-align: center; line-height: 1.35; }
+    .mood-grid { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 0.65rem; }
     .mood-btn {
-      border: none;
-      border-radius: 16px;
-      padding: 1rem 1.25rem;
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      color: #1a1a1a;
+      border: none; border-radius: 16px; padding: 0.9rem 1.25rem;
+      font-size: 1.1rem; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 0.75rem; color: #1a1a1a;
       transition: transform 0.15s, box-shadow 0.15s;
     }
-    .mood-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 14px rgba(0,0,0,0.12);
-    }
+    .mood-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.12); }
     .mood-btn:active { transform: scale(0.98); }
     .mood-btn .em { font-size: 1.75rem; }
 
-    /* ===== SCREEN 3: ACTIVITY ===== */
-    #s-activity { gap: 1.5rem; }
-
-    .mood-tag {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      font-size: 1.15rem;
-      font-weight: 600;
-    }
+    /* ---- ACTIVITY ---- */
+    #s-activity { gap: 1.25rem; }
+    .mood-tag { display: flex; align-items: center; gap: 0.6rem; font-size: 1.15rem; font-weight: 600; }
     .mood-tag .em { font-size: 2rem; }
-
     .activity-card {
-      background: var(--accent-soft);
-      border-radius: 20px;
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.9rem;
-      flex: 1;
+      background: var(--accent-soft); border-radius: 20px; padding: 1.5rem;
+      display: flex; flex-direction: column; gap: 0.9rem; flex: 1;
     }
-    .activity-card h3 {
-      font-size: 1.4rem;
-      font-weight: 800;
-    }
-    .activity-card p {
-      font-size: 1rem;
-      color: #374151;
-      line-height: 1.5;
-    }
+    .activity-card h3 { font-size: 1.4rem; font-weight: 800; }
+    .activity-card p { font-size: 1rem; color: #374151; line-height: 1.5; }
     .badge {
-      display: inline-flex;
-      align-items: center;
-      background: var(--accent);
-      color: #fff;
-      border-radius: 8px;
-      padding: 0.3rem 0.8rem;
-      font-size: 0.9rem;
-      font-weight: 700;
-      width: fit-content;
+      display: inline-flex; background: var(--accent); color: #fff;
+      border-radius: 8px; padding: 0.3rem 0.8rem; font-size: 0.9rem; font-weight: 700; width: fit-content;
     }
-
-    /* ===== SCREEN 4: TIMER ===== */
-    #s-timer {
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      gap: 1.75rem;
+    /* Breathing guide (Ansioso only) */
+    .breathe-wrap { display: none; align-items: center; gap: 0.75rem; margin-top: 0.25rem; }
+    .breathe-wrap.visible { display: flex; }
+    .breathe-orb {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--accent); opacity: 0.5; flex-shrink: 0;
+      animation: breathePulse 8s ease-in-out infinite;
     }
-
-    .timer-label {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #6b7280;
+    @keyframes breathePulse {
+      0%, 100% { transform: scale(0.65); opacity: 0.35; }
+      50%       { transform: scale(1.3);  opacity: 0.7;  }
     }
+    .breathe-hint { font-size: 0.88rem; color: #6b7280; font-style: italic; }
 
+    /* ---- TIMER ---- */
+    #s-timer { align-items: center; justify-content: center; text-align: center; gap: 1.75rem; }
+    .timer-label { font-size: 1.1rem; font-weight: 600; color: #6b7280; }
+    .timer-wrap { position: relative; display: flex; align-items: center; justify-content: center; }
+    .ring-svg { width: 220px; height: 220px; }
+    #t-ring { stroke: var(--accent); transition: stroke-dashoffset 0.95s linear; }
     .timer-clock {
-      font-size: 5rem;
-      font-weight: 900;
-      letter-spacing: -3px;
-      color: var(--accent);
-      font-variant-numeric: tabular-nums;
-      line-height: 1;
+      position: absolute; font-size: 3rem; font-weight: 900;
+      letter-spacing: -2px; color: var(--accent); font-variant-numeric: tabular-nums;
     }
+    .timer-congrats { font-size: 1.6rem; font-weight: 700; display: none; }
+    .timer-actions { display: flex; flex-direction: column; gap: 0.7rem; width: 100%; }
 
-    .timer-congrats {
-      font-size: 1.6rem;
-      font-weight: 700;
-      display: none;
+    /* ---- HISTORY ---- */
+    #s-history { gap: 1.25rem; }
+    #s-history h2 { font-size: 1.45rem; font-weight: 700; }
+    .mood-stats { display: flex; flex-direction: column; gap: 0.45rem; }
+    .stat-title {
+      font-size: 0.78rem; font-weight: 700; color: #9ca3af;
+      letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.1rem;
     }
-
-    .timer-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 0.7rem;
-      width: 100%;
-    }
-
-    /* ===== SCREEN 5: HISTORY ===== */
-    #s-history { gap: 1.5rem; }
-
-    #s-history h2 {
-      font-size: 1.45rem;
-      font-weight: 700;
-    }
-
-    .history-list {
-      flex: 1;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 0.65rem;
-    }
-
+    .stat-row { display: flex; align-items: center; gap: 0.6rem; }
+    .stat-label { font-size: 0.82rem; font-weight: 600; color: #374151; width: 78px; flex-shrink: 0; }
+    .stat-bar-wrap { flex: 1; background: #f3f4f6; border-radius: 6px; height: 9px; overflow: hidden; }
+    .stat-bar { height: 100%; border-radius: 6px; width: 0; transition: width 0.65s ease-out; }
+    .stat-count { font-size: 0.78rem; font-weight: 700; color: #9ca3af; width: 20px; text-align: right; flex-shrink: 0; }
+    .history-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.65rem; }
     .history-empty {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      color: #9ca3af;
-      font-size: 1rem;
-      padding: 2rem 0;
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      text-align: center; color: #9ca3af; font-size: 1rem; padding: 2rem 0;
     }
-
     .history-item {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 14px;
-      padding: 0.9rem 1rem;
+      display: flex; align-items: center; gap: 1rem;
+      border: 1.5px solid #e5e7eb; border-radius: 14px; padding: 0.9rem 1rem;
     }
     .history-item .em { font-size: 1.8rem; flex-shrink: 0; }
-
     .hi-body { flex: 1; min-width: 0; }
-    .hi-name {
-      font-weight: 700;
-      font-size: 0.95rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+    .hi-name { font-weight: 700; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .hi-meta { font-size: 0.8rem; color: #6b7280; margin-top: 0.15rem; }
-
-    .hi-dur {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--accent);
-      flex-shrink: 0;
-    }
+    .hi-dur { font-size: 0.85rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
   </style>
 </head>
 <body>
+
 <div id="clock-bar" aria-live="polite"></div>
+<div id="confetti-box" aria-hidden="true"></div>
+
 <div id="app">
 
-  <!-- SCREEN 1: HOME -->
+  <!-- HOME -->
   <div id="s-home" class="screen active">
     <h1>MindMove</h1>
     <p>Movimento para cada momento</p>
     <div class="home-members">Arthur Gabriel &amp; João Pedro Kern</div>
+    <div id="streak-badge" class="streak-badge" style="display:none"></div>
     <button class="btn btn-primary" onclick="nav('s-mood')">Como você está agora?</button>
   </div>
 
-  <!-- SCREEN 2: MOOD CHECK -->
+  <!-- MOOD CHECK -->
   <div id="s-mood" class="screen">
+    <button class="back-btn" onclick="goHome()" aria-label="Voltar">←</button>
     <h2>Como você está se sentindo hoje?</h2>
     <div class="mood-grid">
-      <button class="mood-btn" style="background:#a78bfa" onclick="pickMood('ansioso')">
-        <span class="em">😰</span> Ansioso
-      </button>
-      <button class="mood-btn" style="background:#93c5fd" onclick="pickMood('cansado')">
-        <span class="em">😴</span> Cansado
-      </button>
-      <button class="mood-btn" style="background:#f87171" onclick="pickMood('estressado')">
-        <span class="em">😤</span> Estressado
-      </button>
-      <button class="mood-btn" style="background:#86efac" onclick="pickMood('bem')">
-        <span class="em">🙂</span> Bem
-      </button>
-      <button class="mood-btn" style="background:#fde68a" onclick="pickMood('animado')">
-        <span class="em">🤩</span> Animado
-      </button>
+      <button class="mood-btn" style="background:#a78bfa" onclick="pickMood('ansioso')"><span class="em">😰</span> Ansioso</button>
+      <button class="mood-btn" style="background:#93c5fd" onclick="pickMood('cansado')"><span class="em">😴</span> Cansado</button>
+      <button class="mood-btn" style="background:#f87171" onclick="pickMood('estressado')"><span class="em">😤</span> Estressado</button>
+      <button class="mood-btn" style="background:#86efac" onclick="pickMood('bem')"><span class="em">🙂</span> Bem</button>
+      <button class="mood-btn" style="background:#fde68a" onclick="pickMood('animado')"><span class="em">🤩</span> Animado</button>
     </div>
   </div>
 
-  <!-- SCREEN 3: ACTIVITY SUGGESTION -->
+  <!-- ACTIVITY SUGGESTION -->
   <div id="s-activity" class="screen">
+    <button class="back-btn" onclick="nav('s-mood')" aria-label="Voltar">←</button>
     <div class="mood-tag">
       <span class="em" id="a-emoji"></span>
       <span id="a-label"></span>
@@ -335,14 +195,27 @@
       <h3 id="a-name"></h3>
       <p id="a-desc"></p>
       <div class="badge" id="a-dur"></div>
+      <div class="breathe-wrap" id="breathe-wrap">
+        <div class="breathe-orb"></div>
+        <span class="breathe-hint">Inspire pelo nariz... expire pela boca...</span>
+      </div>
     </div>
     <button class="btn btn-primary" onclick="beginTimer()">Iniciar timer</button>
   </div>
 
-  <!-- SCREEN 4: TIMER -->
+  <!-- TIMER -->
   <div id="s-timer" class="screen">
     <div class="timer-label" id="t-label"></div>
-    <div class="timer-clock" id="t-clock">00:00</div>
+    <div class="timer-wrap">
+      <svg class="ring-svg" viewBox="0 0 220 220" aria-hidden="true">
+        <circle cx="110" cy="110" r="96" fill="none" stroke="#f3f4f6" stroke-width="12"/>
+        <circle id="t-ring" cx="110" cy="110" r="96" fill="none"
+                stroke-width="12" stroke-linecap="round"
+                transform="rotate(-90 110 110)"
+                stroke-dasharray="603"/>
+      </svg>
+      <div class="timer-clock" id="t-clock">00:00</div>
+    </div>
     <div class="timer-congrats" id="t-congrats">Você completou! 🎉</div>
     <div class="timer-actions">
       <button class="btn btn-primary" id="t-toggle" onclick="toggleTimer()">Iniciar</button>
@@ -351,71 +224,142 @@
     </div>
   </div>
 
-  <!-- SCREEN 5: HISTORY -->
+  <!-- HISTORY -->
   <div id="s-history" class="screen">
     <h2>Seu histórico</h2>
+    <div class="mood-stats" id="mood-stats"></div>
     <div class="history-list" id="hist-list"></div>
     <button class="btn btn-primary" onclick="goHome()">Nova atividade</button>
   </div>
 
 </div>
-<script>
-  function tickClock() {
-    const now = new Date();
-    const h = String(now.getHours()).padStart(2, '0');
-    const m = String(now.getMinutes()).padStart(2, '0');
-    const s = String(now.getSeconds()).padStart(2, '0');
-    document.getElementById('clock-bar').textContent = h + ':' + m + ':' + s;
-  }
-  tickClock();
-  setInterval(tickClock, 1000);
 
+<script>
+  // ---- Data (2 variants per mood) ----
   const DATA = {
-    ansioso:    { name: 'Respiração + Alongamento', desc: 'Respire fundo e solte a tensão do corpo.',        mins: 8,  emoji: '😰', label: 'Ansioso',    color: '#a78bfa', soft: '#f5f3ff' },
-    cansado:    { name: 'Caminhada Leve',           desc: 'Um passeio curto para despertar a energia.',      mins: 10, emoji: '😴', label: 'Cansado',    color: '#93c5fd', soft: '#eff6ff' },
-    estressado: { name: 'Dança Livre',              desc: 'Coloque uma música e dance sem pensar.',          mins: 5,  emoji: '😤', label: 'Estressado', color: '#f87171', soft: '#fef2f2' },
-    bem:        { name: 'Treino Rápido',            desc: 'Aproveite o bom humor para se movimentar mais.', mins: 15, emoji: '🙂', label: 'Bem',        color: '#86efac', soft: '#f0fdf4' },
-    animado:    { name: 'Corrida ou Pulo',          desc: 'Gaste essa energia toda de uma vez!',            mins: 12, emoji: '🤩', label: 'Animado',    color: '#fde68a', soft: '#fefce8' },
+    ansioso: {
+      variants: [
+        { name: 'Respiração + Alongamento', desc: 'Respire fundo e solte a tensão do corpo.', mins: 8 },
+        { name: 'Meditação Rápida',         desc: 'Feche os olhos e foque no momento presente.', mins: 6 },
+      ],
+      emoji: '😰', label: 'Ansioso', color: '#a78bfa', soft: '#f5f3ff',
+    },
+    cansado: {
+      variants: [
+        { name: 'Caminhada Leve',    desc: 'Um passeio curto para despertar a energia.', mins: 10 },
+        { name: 'Alongamento Suave', desc: 'Estique o corpo e acorde os músculos.', mins: 7 },
+      ],
+      emoji: '😴', label: 'Cansado', color: '#93c5fd', soft: '#eff6ff',
+    },
+    estressado: {
+      variants: [
+        { name: 'Dança Livre',    desc: 'Coloque uma música e dance sem pensar.', mins: 5 },
+        { name: 'Sombra no Boxe', desc: 'Solte a tensão com socos rápidos no ar.', mins: 7 },
+      ],
+      emoji: '😤', label: 'Estressado', color: '#f87171', soft: '#fef2f2',
+    },
+    bem: {
+      variants: [
+        { name: 'Treino Rápido', desc: 'Aproveite o bom humor para se movimentar mais.', mins: 15 },
+        { name: 'Yoga Flow',     desc: 'Uma sequência leve para equilibrar corpo e mente.', mins: 12 },
+      ],
+      emoji: '🙂', label: 'Bem', color: '#86efac', soft: '#f0fdf4',
+    },
+    animado: {
+      variants: [
+        { name: 'Corrida ou Pulo', desc: 'Gaste essa energia toda de uma vez!', mins: 12 },
+        { name: 'HIIT Expresso',   desc: '30 segundos ligado, 10 de descanso. Vai!', mins: 10 },
+      ],
+      emoji: '🤩', label: 'Animado', color: '#fde68a', soft: '#fefce8',
+    },
   };
 
-  let mood = null;
+  const CIRC = 603; // 2π × r=96
+
+  let mood = null, currentActivity = null;
   let timerTotal = 0, timerLeft = 0, timerOn = false, timerDone = false, timerTick = null;
 
-  function setAccent(color, soft) {
-    document.documentElement.style.setProperty('--accent', color);
-    document.documentElement.style.setProperty('--accent-soft', soft);
+  // ---- Clock (synced to second boundary) ----
+  (function tick() {
+    const n = new Date();
+    document.getElementById('clock-bar').textContent =
+      n.getHours().toString().padStart(2,'0') + ':' +
+      n.getMinutes().toString().padStart(2,'0') + ':' +
+      n.getSeconds().toString().padStart(2,'0');
+    setTimeout(tick, 1000 - n.getMilliseconds());
+  })();
+
+  // ---- Accent ----
+  function setAccent(c, s) {
+    document.documentElement.style.setProperty('--accent', c);
+    document.documentElement.style.setProperty('--accent-soft', s);
   }
 
+  // ---- Navigation ----
   function nav(id) {
     document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
     document.getElementById(id).classList.add('active');
   }
 
+  // ---- Home ----
+  function refreshHome() {
+    const s = getStreak();
+    const b = document.getElementById('streak-badge');
+    if (s > 0) {
+      b.style.display = '';
+      b.textContent = '🔥 ' + s + (s === 1 ? ' dia seguido!' : ' dias seguidos!');
+    } else {
+      b.style.display = 'none';
+    }
+  }
+
+  function goHome() {
+    setAccent('#6366f1', '#eef2ff');
+    refreshHome();
+    nav('s-home');
+  }
+
+  // ---- Mood selection ----
   function pickMood(key) {
     mood = key;
     const d = DATA[key];
     setAccent(d.color, d.soft);
+    const v = d.variants[Math.floor(Math.random() * d.variants.length)];
+    currentActivity = v;
     document.getElementById('a-emoji').textContent = d.emoji;
-    document.getElementById('a-label').textContent  = d.label;
-    document.getElementById('a-name').textContent   = d.name;
-    document.getElementById('a-desc').textContent   = d.desc;
-    document.getElementById('a-dur').textContent    = d.mins + ' min';
+    document.getElementById('a-label').textContent = d.label;
+    document.getElementById('a-name').textContent  = v.name;
+    document.getElementById('a-desc').textContent  = v.desc;
+    document.getElementById('a-dur').textContent   = v.mins + ' min';
+    document.getElementById('breathe-wrap').classList.toggle('visible', key === 'ansioso');
     nav('s-activity');
   }
 
+  // ---- Timer ----
+  function setRing(left, total) {
+    document.getElementById('t-ring').style.strokeDashoffset = CIRC * (1 - left / total);
+  }
+
+  function resetRing() {
+    const r = document.getElementById('t-ring');
+    r.style.transition = 'none';
+    r.style.strokeDashoffset = '0';
+    r.getBoundingClientRect(); // force reflow so transition: none applies immediately
+    r.style.transition = '';
+  }
+
   function beginTimer() {
-    const d = DATA[mood];
-    timerTotal = d.mins * 60;
+    timerTotal = currentActivity.mins * 60;
     timerLeft  = timerTotal;
-    timerOn    = false;
-    timerDone  = false;
+    timerOn = timerDone = false;
     clearInterval(timerTick);
-    document.getElementById('t-label').textContent      = d.name;
+    document.getElementById('t-label').textContent      = currentActivity.name;
     document.getElementById('t-clock').textContent      = fmt(timerLeft);
     document.getElementById('t-congrats').style.display = 'none';
     document.getElementById('t-toggle').style.display   = '';
     document.getElementById('t-toggle').textContent     = 'Iniciar';
     document.getElementById('t-hist').style.display     = 'none';
+    resetRing();
     nav('s-timer');
   }
 
@@ -435,10 +379,10 @@
       timerTick = setInterval(() => {
         timerLeft--;
         document.getElementById('t-clock').textContent = fmt(timerLeft);
+        setRing(timerLeft, timerTotal);
         if (timerLeft <= 0) {
           clearInterval(timerTick);
-          timerOn   = false;
-          timerDone = true;
+          timerOn = false; timerDone = true;
           onComplete();
         }
       }, 1000);
@@ -447,67 +391,151 @@
 
   function resetTimer() {
     clearInterval(timerTick);
-    timerOn   = false;
-    timerDone = false;
+    timerOn = timerDone = false;
     timerLeft = timerTotal;
     document.getElementById('t-clock').textContent      = fmt(timerLeft);
     document.getElementById('t-congrats').style.display = 'none';
     document.getElementById('t-toggle').style.display   = '';
     document.getElementById('t-toggle').textContent     = 'Iniciar';
     document.getElementById('t-hist').style.display     = 'none';
+    resetRing();
   }
 
   function onComplete() {
     document.getElementById('t-congrats').style.display = 'block';
     document.getElementById('t-toggle').style.display   = 'none';
     document.getElementById('t-hist').style.display     = '';
+    playChime();
+    spawnConfetti();
+    if (navigator.vibrate) navigator.vibrate([180, 80, 180]);
     saveEntry();
   }
 
+  // ---- Chime (Web Audio API — no files needed) ----
+  function playChime() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [[523.25, 0], [659.25, 0.18], [783.99, 0.36], [1046.5, 0.54]].forEach(([freq, delay]) => {
+        const osc = ctx.createOscillator(), gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'sine'; osc.frequency.value = freq;
+        const t = ctx.currentTime + delay;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.28, t + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.7);
+        osc.start(t); osc.stop(t + 0.7);
+      });
+    } catch {}
+  }
+
+  // ---- Confetti ----
+  function spawnConfetti() {
+    const box     = document.getElementById('confetti-box');
+    const palette = ['#a78bfa','#93c5fd','#f87171','#86efac','#fde68a','#6366f1','#f472b6','#34d399'];
+    for (let i = 0; i < 80; i++) {
+      const el = document.createElement('div');
+      const sz = 6 + Math.random() * 8;
+      el.className = 'cp';
+      el.style.cssText =
+        `left:${(Math.random()*100).toFixed(1)}%;` +
+        `background:${palette[i % palette.length]};` +
+        `width:${sz.toFixed(1)}px;height:${sz.toFixed(1)}px;` +
+        `border-radius:${Math.random() > 0.4 ? '50%' : '3px'};` +
+        `animation-delay:${(Math.random() * 0.5).toFixed(2)}s;` +
+        `animation-duration:${(0.9 + Math.random() * 0.9).toFixed(2)}s;`;
+      box.appendChild(el);
+      el.addEventListener('animationend', () => el.remove());
+    }
+  }
+
+  // ---- Streak ----
+  function getStreak() {
+    const hist = loadHistory();
+    if (!hist.length) return 0;
+    const days = new Set(hist.map(e => e.date.split(' ')[0]));
+    let streak = 0;
+    const d = new Date();
+    for (let i = 0; i < 365; i++) {
+      if (days.has(d.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' }))) {
+        streak++;
+        d.setDate(d.getDate() - 1);
+      } else break;
+    }
+    return streak;
+  }
+
+  // ---- Persistence ----
   function saveEntry() {
-    const d   = DATA[mood];
-    const now = new Date();
+    const d = DATA[mood], now = new Date();
     const entry = {
-      date:      now.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-                 + ' ' + now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      date:      now.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' })
+                 + ' ' + now.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }),
       emoji:     d.emoji,
       moodLabel: d.label,
-      activity:  d.name,
-      mins:      d.mins,
+      activity:  currentActivity.name,
+      mins:      currentActivity.mins,
     };
-    const hist = loadHistory();
-    hist.unshift(entry);
-    localStorage.setItem('mindmove', JSON.stringify(hist));
+    const h = loadHistory();
+    h.unshift(entry);
+    localStorage.setItem('mindmove', JSON.stringify(h));
   }
 
   function loadHistory() {
     try { return JSON.parse(localStorage.getItem('mindmove') || '[]'); } catch { return []; }
   }
 
+  // ---- History screen ----
   function goHistory() {
-    const hist = loadHistory();
-    const el   = document.getElementById('hist-list');
-    if (hist.length === 0) {
-      el.innerHTML = '<div class="history-empty">Nenhuma atividade ainda. Comece agora!</div>';
+    const hist    = loadHistory();
+    const listEl  = document.getElementById('hist-list');
+    const statsEl = document.getElementById('mood-stats');
+    const COLORS  = { Ansioso:'#a78bfa', Cansado:'#93c5fd', Estressado:'#f87171', Bem:'#86efac', Animado:'#fde68a' };
+
+    if (hist.length) {
+      const counts = {};
+      hist.forEach(e => { counts[e.moodLabel] = (counts[e.moodLabel] || 0) + 1; });
+      const max = Math.max(...Object.values(counts));
+      statsEl.innerHTML =
+        '<div class="stat-title">Humores mais frequentes</div>' +
+        Object.entries(counts)
+          .sort((a, b) => b[1] - a[1])
+          .map(([label, n]) =>
+            `<div class="stat-row">
+               <span class="stat-label">${label}</span>
+               <div class="stat-bar-wrap">
+                 <div class="stat-bar" data-w="${((n/max)*100).toFixed(0)}%"
+                      style="background:${COLORS[label]||'#e5e7eb'}"></div>
+               </div>
+               <span class="stat-count">${n}</span>
+             </div>`
+          ).join('');
+      statsEl.style.display = '';
+      requestAnimationFrame(() => {
+        statsEl.querySelectorAll('.stat-bar').forEach(b => { b.style.width = b.dataset.w; });
+      });
     } else {
-      el.innerHTML = hist.map(e => `
-        <div class="history-item">
-          <span class="em">${e.emoji}</span>
-          <div class="hi-body">
-            <div class="hi-name">${e.activity}</div>
-            <div class="hi-meta">${e.moodLabel} · ${e.date}</div>
-          </div>
-          <span class="hi-dur">${e.mins} min</span>
-        </div>
-      `).join('');
+      statsEl.innerHTML = '';
+      statsEl.style.display = 'none';
     }
+
+    listEl.innerHTML = hist.length
+      ? hist.map(e =>
+          `<div class="history-item">
+             <span class="em">${e.emoji}</span>
+             <div class="hi-body">
+               <div class="hi-name">${e.activity}</div>
+               <div class="hi-meta">${e.moodLabel} · ${e.date}</div>
+             </div>
+             <span class="hi-dur">${e.mins} min</span>
+           </div>`
+        ).join('')
+      : '<div class="history-empty">Nenhuma atividade ainda. Comece agora!</div>';
+
     nav('s-history');
   }
 
-  function goHome() {
-    setAccent('#6366f1', '#eef2ff');
-    nav('s-home');
-  }
+  // ---- Init ----
+  refreshHome();
 </script>
 </body>
 </html>
